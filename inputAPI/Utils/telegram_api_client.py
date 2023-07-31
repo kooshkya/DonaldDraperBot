@@ -26,6 +26,6 @@ class TelegramAPIClient(metaclass=SingletonMeta):
         result = ""
         result += f"Status Code: {response.status_code}\n"
         temp_obj = json.loads(response.text)
-        pretty_json = json.dumps(temp_obj, indent=2)
+        pretty_json = json.dumps(temp_obj, indent=2, ensure_ascii=False)
         result += pretty_json
         return result
