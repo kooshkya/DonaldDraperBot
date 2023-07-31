@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from inputAPI.Utils.telegram_api_client import TelegramAPIClient
 import requests
 
 class Command(BaseCommand):
@@ -10,4 +11,10 @@ class Command(BaseCommand):
             command = input()
             if (command.lower().startswith("quit")):
                 return
+            client = TelegramAPIClient()
+            response = client.convert_response_to_pretty_string(
+                client.call_get_format_function(command)
+                )
+            self.stdout.write(response)
+        
             
