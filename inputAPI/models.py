@@ -1,4 +1,6 @@
 from django.db import models
+import datetime
+
 
 LONG_LENGTH = 200
 SMALL_LENGTH = 50
@@ -33,6 +35,9 @@ class Message(models.Model):
     @classmethod
     def does_message_id_exist(cls, message_id):
         return bool(cls.objects.filter(pk=message_id).exists())
+    
+    def get_formatted_date(self):
+        return datetime.datetime.fromtimestamp(self.date)
 
 
 class Update(models.Model):

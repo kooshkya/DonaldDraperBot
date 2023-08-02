@@ -11,7 +11,7 @@ r = t.call_get_format_function("getUpdates?limit=5")
 raw = r.content
 i = io.BytesIO(raw)
 d = JSONParser().parse(i)
-dd = d["result"][2]
+dd = d["result"][1]
 u = UpdateSerializer(data=dd)
 u.is_valid()
 u.validated_data

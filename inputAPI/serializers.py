@@ -3,6 +3,7 @@ from inputAPI.models import Update, Message
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    message_id = serializers.IntegerField(null=True)
     class Meta:
         model = Message
         fields = ["message_id", "date", "text"]
@@ -10,10 +11,11 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class UpdateSerializer(serializers.ModelSerializer):
     message = MessageSerializer(required=False)
+    edited_message = MessageSerializer(required=False)
 
     class Meta:
         model = Update
-        fields = ["update_id", "message", "message_edited"]
+        fields = ["update_id", "message", "message_edited", "edited_message"]
 
     def get_message_or_create_it(self, data):
         id = data.get("message_id")
@@ -33,8 +35,9 @@ class UpdateSerializer(serializers.ModelSerializer):
             validated_data["message"] = message
         if "edited_message" in validated_data:
             validated_data["message_edited"] = True
-            message_data = validated_data.get("message")
+            message_data = validated_data.get("edited_message")
             message = self.get_message_or_create_it(message_data)
+            validated_data.pop("edited_message")
             validated_data["message"] = message
 
 
