@@ -24,6 +24,21 @@ class TelegramUser(models.Model):
     last_name = models.CharField(max_length=LONG_LENGTH, null=True)
     username = models.CharField(max_length=LONG_LENGTH, null=True)
 
+    @classmethod
+    def create_or_update_user(cls, data: dict):
+        assert "id" in data
+        query = cls.objects.filter(pk=data.get("id"))
+        if not query.exists:
+            return cls.create(data)
+        else:
+            instance = query.first()
+            for field in data:
+                if hasattr(instance, field):
+                    setattr(instance, field, data.get(field))
+            return instance.save()
+
+
+
 class Message(models.Model):
     message_id = models.IntegerField(primary_key=True)
     date = models.PositiveBigIntegerField()
@@ -31,13 +46,22 @@ class Message(models.Model):
                     on_delete=models.DO_NOTHING, null=True, related_name="messages")
     chat = models.OneToOneField(Chat, on_delete=models.DO_NOTHING, null=True)
     text = models.TextField(null=True)
-
-    @classmethod
-    def does_message_id_exist(cls, message_id):
-        return bool(cls.objects.filter(pk=message_id).exists())
     
     def get_formatted_date(self):
         return datetime.datetime.fromtimestamp(self.date)
+    
+    @classmethod
+    def create_or_update_message(cls, data: dict):
+        assert "message_id" in data
+        query = cls.objects.filter(pk=data.get("message_id"))
+        if not query.exists:
+            return cls.create(data)
+        else:
+            instance = query.first()
+            for field in data:
+                if hasattr(instance, field):
+                    setattr(instance, field, data.get(field))
+            return instance.save()
 
 
 class Update(models.Model):

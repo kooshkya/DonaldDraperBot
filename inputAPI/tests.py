@@ -15,3 +15,9 @@ dd = d["result"][0]
 u = UpdateSerializer(data=dd)
 u.is_valid()
 u.validated_data
+
+
+from inputAPI.models import *
+Update.objects.all().delete()
+Message.objects.all().delete()
+TelegramUser.objects.all().delete()

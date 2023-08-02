@@ -1,14 +1,32 @@
 from rest_framework import serializers
-from inputAPI.models import Update, Message
+from inputAPI.models import Update, Message, TelegramUser
+
+class TelegramUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TelegramUser
+        fields = ["id", "is_bot", "first_name", "last_name", "username"]
 
 
 class MessageSerializer(serializers.ModelSerializer):
     # In order to keep the serializer from throwing errors
     #  when an already existing id is supplied, this field has been overridden
     message_id = serializers.IntegerField()
+    from_user = TelegramUserSerializer(required=False)
+
+    def validate(self, data):
+        if "from_user" in data:
+            user_data = data.get("from_user")
+            TelegramUser.create_or_update_user(user_data)
+
     class Meta:
         model = Message
-        fields = ["message_id", "date", "text"]
+        fields = ["message_id", "date", "text", "from_user"]
+
+    def update():
+        raise NotImplemented("Not implemented!")
+    
+    def create():
+        raise NotImplemented("Not implemented!")
 
 
 class UpdateSerializer(serializers.ModelSerializer):
