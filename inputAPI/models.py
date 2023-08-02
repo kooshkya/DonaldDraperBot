@@ -54,14 +54,15 @@ class Message(models.Model):
     def create_or_update_message(cls, data: dict):
         assert "message_id" in data
         query = cls.objects.filter(pk=data.get("message_id"))
-        if not query.exists:
-            return cls.create(data)
+        if not query.exists():
+            return cls.objects.create(**data)
         else:
             instance = query.first()
             for field in data:
                 if hasattr(instance, field):
                     setattr(instance, field, data.get(field))
-            return instance.save()
+            instance.save()
+            return instance
 
 
 class Update(models.Model):
