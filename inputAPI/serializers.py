@@ -3,7 +3,9 @@ from inputAPI.models import Update, Message
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    message_id = serializers.IntegerField(null=True)
+    # In order to keep the serializer from throwing errors
+    #  when an already existing id is supplied, this field has been overridden
+    message_id = serializers.IntegerField()
     class Meta:
         model = Message
         fields = ["message_id", "date", "text"]
@@ -36,7 +38,7 @@ class UpdateSerializer(serializers.ModelSerializer):
         if "edited_message" in validated_data:
             validated_data["message_edited"] = True
             message_data = validated_data.get("edited_message")
-            message = self.get_message_or_create_it(message_data)
+            message = Message.objects.create(**message_data)
             validated_data.pop("edited_message")
             validated_data["message"] = message
 
