@@ -29,13 +29,14 @@ class TelegramUser(models.Model):
         assert "id" in data
         query = cls.objects.filter(pk=data.get("id"))
         if not query.exists:
-            return cls.create(data)
+            return cls.objects.create(**data)
         else:
             instance = query.first()
             for field in data:
                 if hasattr(instance, field):
                     setattr(instance, field, data.get(field))
-            return instance.save()
+            instance.save()
+            return instance
 
 
 
