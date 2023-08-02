@@ -5,16 +5,18 @@ import datetime
 LONG_LENGTH = 200
 SMALL_LENGTH = 50
 
-chat_types = (("pr", "private"),
-            ("gr", "group"),
-            ("sgr", "supergroup"),
-            ("ch", "channel"))
+chat_types = (("private", "private"),
+            ("group", "group"),
+            ("supergroup", "supergroup"),
+            ("channel", "channel"))
 
 class Chat(models.Model):
     id = models.BigIntegerField(primary_key=True)
     type = models.CharField(max_length=SMALL_LENGTH, choices=chat_types)
     title = models.CharField(max_length=LONG_LENGTH, null=True)
     username = models.CharField(max_length=LONG_LENGTH, null=True)
+    first_name = models.CharField(max_length=LONG_LENGTH, null=True)
+    last_name = models.CharField(max_length=LONG_LENGTH, null=True)
 
 
 class TelegramUser(models.Model):
