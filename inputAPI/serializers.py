@@ -31,13 +31,11 @@ class MessageSerializer(serializers.ModelSerializer):
                 return instance.id
 
     def to_internal_value(self, data):
-        print(f"incoming data is {data}")
         if "from" in data:
             data["from_user"] = data.pop("from")
         if "from_user" in data:
             from_data = data.get("from_user")
             data["from_user"] = self.attain_sender_id(from_data)
-        print(f"outgoing data is {data}")
         return super().to_internal_value(data)
 
 class UpdateSerializer(serializers.ModelSerializer):
@@ -53,12 +51,11 @@ class UpdateSerializer(serializers.ModelSerializer):
             if query.exists():
                 instance = query.first()
                 if message_edited:
-                    new_serializer = MessageSerializer(instance, 
-                                                       data=message_serializer.validated_data)
-                    if new_serializer.is_valid(raise_exception=True):
-                        msg = new_serializer.save()
-                        return msg.message_id
-                else:
+                    validated_data = message_serializer.validated_data
+                    for field in validated_data:
+                        if hasattr(instance, field):
+                            setattr(instance, field, validated_data.get(field))
+                    instance.save()
                     return instance.message_id
             else:
                 msg = message_serializer.save()
