@@ -43,9 +43,9 @@ class TelegramUser(models.Model):
 class Message(models.Model):
     message_id = models.IntegerField(primary_key=True)
     date = models.PositiveBigIntegerField()
-    from_user = models.OneToOneField(TelegramUser, verbose_name="from",
+    from_user = models.ForeignKey(TelegramUser, verbose_name="from",
                     on_delete=models.DO_NOTHING, null=True, related_name="messages")
-    chat = models.OneToOneField(Chat, on_delete=models.DO_NOTHING, null=True)
+    chat = models.ForeignKey(Chat, on_delete=models.DO_NOTHING, null=True)
     text = models.TextField(null=True)
     
     def get_formatted_date(self):
