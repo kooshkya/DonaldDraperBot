@@ -48,6 +48,7 @@ class Message(models.Model):
     from_user = models.ForeignKey(TelegramUser, verbose_name="from",
                     on_delete=models.DO_NOTHING, null=True, related_name="messages")
     chat = models.ForeignKey(Chat, on_delete=models.DO_NOTHING, null=True)
+    sender_chat = models.ForeignKey(Chat, on_delete=models.DO_NOTHING, null=True, related_name="messages_sent_on_behalf")
     text = models.TextField(null=True)
     
     def get_formatted_date(self):

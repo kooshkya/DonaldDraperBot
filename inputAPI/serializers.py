@@ -26,7 +26,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ["message_id", "date", "text", "from_user", "chat"]
+        fields = ["message_id", "date", "text", "from_user", "chat", "sender_chat"]
 
     def attain_sender_id(self, from_data):
         if isinstance(from_data, TelegramUser):
@@ -55,8 +55,6 @@ class MessageSerializer(serializers.ModelSerializer):
                 instance = chat_serializer.save()
                 return instance.id
             else:
-                print(chat_data)
-                print(chat_serializer.errors)
                 raise serializers.ValidationError({"ChatSerializer": "The data supplied for chat is not valid"})
         else:
             raise serializers.ValidationError({"ChatLexSerializer": "the data supplied for chat is not valid."})
@@ -69,6 +67,8 @@ class MessageSerializer(serializers.ModelSerializer):
             data["from_user"] = self.attain_sender_id(from_data)
         if "chat" in data:
             data["chat"] = self.attain_chat_id(data.get("chat"))
+        if "sender_chat" in data:
+            data["sender_chat"] = self.attain_chat_id(data.get("sender_chat"))
         return super().to_internal_value(data)
 
 
@@ -100,5 +100,10 @@ class UpdateSerializer(serializers.ModelSerializer):
             message_edited = "edited_message" in data
             data["message_edited"] = message_edited
             message_data = data.get("message", data.get("edited_message"))
+            data["message"] = self.calculate_message_field(message_edited, message_data)
+        if "channel_post" in data or "edited_channel_post" in data:
+            message_edited = "edited_channel_post" in data
+            data["message_edited"] = message_edited
+            message_data = data.get("channel_post", data.get("edited_channel_post"))
             data["message"] = self.calculate_message_field(message_edited, message_data)
         return super().to_internal_value(data)
