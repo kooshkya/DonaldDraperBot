@@ -22,24 +22,28 @@ class TelegramUserLexSerializer(serializers.Serializer):
 class MessageSerializer(serializers.ModelSerializer):
     # In order to keep the serializer from throwing errors
     #  when an already existing id is supplied, this field has been overridden
-    message_id = serializers.IntegerField()
+    message_id = serializers.IntegerField() 
 
     class Meta:
         model = Message
-        fields = ["message_id", "date", "text", "from_user", "chat", "sender_chat"]
+        fields = ["message_id", "message_thread_id","date", "text", "from_user", "chat", "sender_chat"]
 
     def attain_sender_id(self, from_data):
         if isinstance(from_data, TelegramUser):
             return from_data.id
         user_lex_serializer = TelegramUserLexSerializer(data=from_data)
-        if user_lex_serializer.is_valid(raise_exception=True):
+        if user_lex_serializer.is_valid():
             query = TelegramUser.objects.filter(pk=user_lex_serializer.validated_data.get("id"))
             if query.exists():
                 return query.first().id
             user_serializer = TelegramUserSerializer(data=from_data)
-            if user_serializer.is_valid(raise_exception=True):
+            if user_serializer.is_valid():
                 instance = user_serializer.save()
                 return instance.id
+            else:
+                raise serializers.ValidationError(f"MessageSerializer: The user information supplied is invalid: {user_serializer.errors}")
+        else:
+            raise serializers.ValidationError(f"MessageSerializer: The user id supplied is invalid: {user_lex_serializer.errors}")
             
     def attain_chat_id(self, chat_data):
         if isinstance(chat_data, Chat):
@@ -79,9 +83,10 @@ class UpdateSerializer(serializers.ModelSerializer):
 
     def calculate_message_field(self, message_edited, message_data):
         message_serializer = MessageSerializer(data=message_data)
-        if message_serializer.is_valid(raise_exception=True):
+        if message_serializer.is_valid():
             id = message_serializer.validated_data.get("message_id")
-            query = Message.objects.filter(pk=id)
+            chat_id = message_serializer.validated_data.get("chat").id
+            query = Message.objects.filter(message_id=id, chat=chat_id)
             if query.exists():
                 instance = query.first()
                 if message_edited:
@@ -90,10 +95,13 @@ class UpdateSerializer(serializers.ModelSerializer):
                         if hasattr(instance, field):
                             setattr(instance, field, validated_data.get(field))
                     instance.save()
-                    return instance.message_id
+                    return instance.id
             else:
                 msg = message_serializer.save()
-                return msg.message_id
+                return msg.id
+        else:
+            raise serializers.ValidationError(
+                f"UpdateSerializer: the message data supplied is invalid: {message_serializer.errors}")
 
     def to_internal_value(self, data):
         if "message" in data or "edited_message" in data:

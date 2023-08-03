@@ -43,13 +43,20 @@ class TelegramUser(models.Model):
 
 
 class Message(models.Model):
-    message_id = models.IntegerField(primary_key=True)
+    message_id = models.IntegerField()
+    chat = models.ForeignKey(Chat, on_delete=models.DO_NOTHING)
+    message_thread_id = models.IntegerField(null=True)
     date = models.PositiveBigIntegerField()
     from_user = models.ForeignKey(TelegramUser, verbose_name="from",
                     on_delete=models.DO_NOTHING, null=True, related_name="messages")
-    chat = models.ForeignKey(Chat, on_delete=models.DO_NOTHING, null=True)
     sender_chat = models.ForeignKey(Chat, on_delete=models.DO_NOTHING, null=True, related_name="messages_sent_on_behalf")
     text = models.TextField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["message_id", "chat"],
+                                     name="message_id_and_chat_unique_constraint")
+        ]
     
     def get_formatted_date(self):
         return datetime.datetime.fromtimestamp(self.date)
