@@ -1,6 +1,6 @@
 from django.db import models
 import datetime
-
+from inputAPI.Utils.telegram_api_client import TelegramAPIClient
 
 LONG_LENGTH = 200
 SMALL_LENGTH = 50
@@ -18,6 +18,11 @@ class Sticker(models.Model):
     height = models.IntegerField()
     is_animated = models.BooleanField()
     is_video = models.BooleanField()
+
+    def get_file_path(self, renew=False):
+        t = TelegramAPIClient()
+        return t.download_file(self.file_id, renew)
+
 
 
 class Chat(models.Model):

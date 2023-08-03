@@ -3,3 +3,4 @@ venv/
 DonDraperAPI/token.py
 migrations/
 db.sqlite3
+downloaded_files/

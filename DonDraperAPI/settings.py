@@ -126,3 +126,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 API_TOKEN = token.TOKEN
 API_DOMAIN = "https://api.telegram.org"
+FILES_DIRECTORY = "downloaded_files"
