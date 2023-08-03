@@ -10,6 +10,16 @@ chat_types = (("private", "private"),
             ("supergroup", "supergroup"),
             ("channel", "channel"))
 
+class Sticker(models.Model):
+    file_id = models.CharField(max_length=LONG_LENGTH, primary_key=True)
+    file_unique_id = models.CharField(max_length=LONG_LENGTH)
+    sticker_type = models.CharField(max_length=SMALL_LENGTH)
+    width = models.IntegerField()
+    height = models.IntegerField()
+    is_animated = models.BooleanField()
+    is_video = models.BooleanField()
+
+
 class Chat(models.Model):
     id = models.BigIntegerField(primary_key=True)
     type = models.CharField(max_length=SMALL_LENGTH, choices=chat_types)
@@ -51,6 +61,7 @@ class Message(models.Model):
                     on_delete=models.DO_NOTHING, null=True, related_name="messages")
     sender_chat = models.ForeignKey(Chat, on_delete=models.DO_NOTHING, null=True, related_name="messages_sent_on_behalf")
     text = models.TextField(null=True)
+    sticker = models.ForeignKey(Sticker, null=True, on_delete=models.DO_NOTHING)
 
     class Meta:
         constraints = [

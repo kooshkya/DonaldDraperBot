@@ -32,6 +32,7 @@ def func(jj):
     i = io.BytesIO(raw)
     d = JSONParser().parse(i)
     dd = d["result"][jj]
+    print(dd)
     u = UpdateSerializer(data=dd)
     print(u.is_valid())
     print(u.validated_data)

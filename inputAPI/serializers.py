@@ -1,5 +1,20 @@
 from rest_framework import serializers
-from inputAPI.models import Update, Message, TelegramUser, Chat
+from inputAPI.models import Update, Message, TelegramUser, Chat, Sticker
+
+
+class StickerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sticker
+        fields = "__all__"
+
+    def to_internal_value(self, data):
+        if "type" in data:
+            data["sticker_type"] = data.pop("type")
+        return super().to_internal_value(data)
+
+class StickerLexSerializer(serializers.Serializer):
+    file_id = serializers.CharField()
+    file_unique_id = serializers.CharField()
 
 
 class ChatSerializer(serializers.ModelSerializer):
@@ -26,7 +41,9 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ["message_id", "message_thread_id","date", "text", "from_user", "chat", "sender_chat"]
+        fields = ["message_id", "message_thread_id",
+                  "date", "text", "from_user", "chat", "sender_chat",
+                  "sticker"]
 
     def attain_sender_id(self, from_data):
         if isinstance(from_data, TelegramUser):
@@ -41,9 +58,9 @@ class MessageSerializer(serializers.ModelSerializer):
                 instance = user_serializer.save()
                 return instance.id
             else:
-                raise serializers.ValidationError(f"MessageSerializer: The user information supplied is invalid: {user_serializer.errors}")
+                raise serializers.ValidationError({"MessageSerializer": f"The user information supplied is invalid: {user_serializer.errors}"})
         else:
-            raise serializers.ValidationError(f"MessageSerializer: The user id supplied is invalid: {user_lex_serializer.errors}")
+            raise serializers.ValidationError({"MessageSerializer": f"The user id supplied is invalid: {user_lex_serializer.errors}"})
             
     def attain_chat_id(self, chat_data):
         if isinstance(chat_data, Chat):
@@ -62,7 +79,25 @@ class MessageSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"ChatSerializer": "The data supplied for chat is not valid"})
         else:
             raise serializers.ValidationError({"ChatLexSerializer": "the data supplied for chat is not valid."})
+    
+    def attain_sticker_pk(self, sticker_data):
+        if isinstance(sticker_data, Sticker):
+            return sticker_data.pk
+        sticker_lex_serializer = StickerLexSerializer(data=sticker_data)
+        if sticker_lex_serializer.is_valid():
+            query = Sticker.objects.filter(pk=sticker_lex_serializer.validated_data.get("file_id"))
+            if query.exists():
+                return query.first().pk
+            sticker_serializer = StickerSerializer(data=sticker_data)
+            if sticker_serializer.is_valid():
+                instance = sticker_serializer.save()
+                return instance.pk
+            else:
+                raise serializers.ValidationError({"StickerSerializer": f"invalid sticker data: {sticker_serializer.errors}"})
+        else:
+            raise serializers.ValidationError({"StickerLexSerializer": f"file_id and file_unique_id not given or invalid: {sticker_lex_serializer.errors}"})
         
+
     def to_internal_value(self, data):
         if "from" in data:
             data["from_user"] = data.pop("from")
@@ -73,6 +108,8 @@ class MessageSerializer(serializers.ModelSerializer):
             data["chat"] = self.attain_chat_id(data.get("chat"))
         if "sender_chat" in data:
             data["sender_chat"] = self.attain_chat_id(data.get("sender_chat"))
+        if "sticker" in data:
+            data["sticker"] = self.attain_sticker_pk(data.get("sticker"))
         return super().to_internal_value(data)
 
 
@@ -96,6 +133,8 @@ class UpdateSerializer(serializers.ModelSerializer):
                             setattr(instance, field, validated_data.get(field))
                     instance.save()
                     return instance.id
+                else:
+                    return instance.pk
             else:
                 msg = message_serializer.save()
                 return msg.id
