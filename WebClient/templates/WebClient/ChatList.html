@@ -9,7 +9,7 @@
   <h1>Chat List</h1>
   <ul class="chat-list">
     {% for chat in object_list %}
-        <li><a href="#">
+        <li><a href="{% url 'WebClient:chat_detail' chat.id %}">
             {{ chat.id }} - {{ chat.type }} - {{ chat.get_title }}
         </a></li>
     {% endfor %}

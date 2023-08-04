@@ -41,11 +41,10 @@ class TelegramAPIClient(metaclass=SingletonMeta):
         directory_path = self.generate_file_directory(file_id)
         if os.path.exists(directory_path) and not renew:
             return directory_path
-        file_path = self.get_download_link(file_id)
-        if not file_path:
+        target_url = self.get_download_link(file_id)
+        if not target_url:
             #logger.log(f"Failed to download file_id {file_id}, link not fetched.")
             return None
-        target_url = f"{API_DOMAIN}/file/bot{API_TOKEN}/{file_path}"
         response = requests.get(target_url, stream=True)
         if response.status_code == 200:
             with open(directory_path, "wb") as f:
@@ -62,6 +61,8 @@ class TelegramAPIClient(metaclass=SingletonMeta):
         r = self.call_get_format_function("getFile", file_id=file_id)
         if r.status_code == 200:
             res = JSONParser().parse(io.BytesIO(r.content))
-            return res.get("result").get("file_path")
+            file_path = res.get("result").get("file_path")
+            target_url = f"{API_DOMAIN}/file/bot{API_TOKEN}/{file_path}"
+            return target_url
         else:
             return None
