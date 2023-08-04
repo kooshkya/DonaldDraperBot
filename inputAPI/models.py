@@ -33,6 +33,13 @@ class Chat(models.Model):
     first_name = models.CharField(max_length=LONG_LENGTH, null=True)
     last_name = models.CharField(max_length=LONG_LENGTH, null=True)
 
+    def get_title(self):
+        return self.title or self.get_full_name() or self.username or "Title Unknown"
+
+    def get_full_name(self):
+        if self.first_name or self.last_name:
+            return f"{self.first_name}" + (f" {self.last_name}" if self.last_name else "")
+        return None
 
 class TelegramUser(models.Model):
     id = models.BigIntegerField(primary_key=True)

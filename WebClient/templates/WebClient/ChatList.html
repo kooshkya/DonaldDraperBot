@@ -1,0 +1,18 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat List</title>
+  <link rel="stylesheet" href="{% static 'WebClient/style.css' %}">
+</head>
+<body>
+  <h1>Chat List</h1>
+  <ul class="chat-list">
+    {% for chat in object_list %}
+        <li><a href="#">
+            {{ chat.id }} - {{ chat.type }} - {{ chat.get_title }}
+        </a></li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

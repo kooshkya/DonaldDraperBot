@@ -1,0 +1,33 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  
+  h1 {
+    text-align: center;
+  }
+  
+  ul.chat-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  ul.chat-list li {
+    margin-bottom: 10px;
+  }
+  
+  ul.chat-list li a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f7f7f7;
+    transition: background-color 0.3s ease;
+  }
+  
+  ul.chat-list li a:hover {
+    background-color: #eee;
+  }
+  

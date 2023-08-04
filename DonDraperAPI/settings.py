@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'WebClient.apps.WebclientConfig',
     'inputAPI.apps.InputapiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
